@@ -1,105 +1,144 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import SwipeCard from '../components/SwipeCard';
 import useSwipe from '../hooks/useSwipe';
 import { useGroup } from '../context/GroupContext';
+import Button from '../components/ui/Button';
+import EmptyState from '../components/ui/EmptyState';
+import PageHeader from '../components/ui/PageHeader';
+import StatPill from '../components/ui/StatPill';
+import { destinations, type Destination } from '../data/destinations';
 import '../styles/pages/SwipeDeck.scss';
-
-interface Destination {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  rating: number;
-  price: number;
-}
 
 const SwipeDeck: React.FC = () => {
   const navigate = useNavigate();
-  const { addMatch } = useGroup();
-  const [cards, setCards] = useState<Destination[]>([
-    {
-      id: '1',
-      title: 'Kraków',
-      description: 'Zabytkowe miasto pełne historii i kultury',
-      image: '/images/krakow.jpg',
-      rating: 4.8,
-      price: 1200,
-    },
-    {
-      id: '2',
-      title: 'Bałtyk',
-      description: 'Piękne plaże i wakacje na wybrzeżu',
-      image: '/images/baltyk.jpg',
-      rating: 4.5,
-      price: 800,
-    },
-    {
-      id: '3',
-      title: 'Tatry',
-      description: 'Góry idealne do trekkingu i wspinaczki',
-      image: '/images/tatry.jpg',
-      rating: 4.9,
-      price: 1500,
-    },
-  ]);
+  const {
+    addMatch,
+    groupName,
+    matches,
+    removeMatch,
+    setCurrentStep,
+  } = useGroup();
+  const [cards, setCards] = useState<Destination[]>(
+    destinations.filter((destination) => !matches.includes(destination.id))
+  );
+  const [history, setHistory] = useState<Array<{ card: Destination; liked: boolean }>>([]);
+  const totalCards = cards.length + history.length;
+  const progress = totalCards === 0 ? 100 : Math.round((history.length / totalCards) * 100);
 
-  const [matches, setMatches] = useState<string[]>([]);
-  const { position, rotate, handleTouchStart, handleTouchMove, handleTouchEnd } =
+  const handleDecision = useCallback((direction: 'left' | 'right') => {
+    setCards((currentCards) => {
+      const [currentCard, ...nextCards] = currentCards;
+      if (!currentCard) {
+        return currentCards;
+      }
+
+      const liked = direction === 'right';
+      setHistory((currentHistory) => [...currentHistory, { card: currentCard, liked }]);
+
+      if (liked) {
+        addMatch(currentCard.id);
+      }
+
+      return nextCards;
+    });
+  }, [addMatch]);
+
+  const handleUndo = () => {
+    setHistory((currentHistory) => {
+      const previous = currentHistory.at(-1);
+      if (!previous) {
+        return currentHistory;
+      }
+
+      setCards((currentCards) => [previous.card, ...currentCards]);
+      if (previous.liked) {
+        removeMatch(previous.card.id);
+      }
+
+      return currentHistory.slice(0, -1);
+    });
+  };
+
+  const goToFinalPlan = () => {
+    setCurrentStep('final');
+    navigate('/final');
+  };
+
+  const { position, rotate, directionHint, handlePointerDown, handlePointerMove, handlePointerUp } =
     useSwipe(
       (direction) => {
-        const currentCard = cards[0];
-        if (currentCard) {
-          if (direction === 'right') {
-            setMatches([...matches, currentCard.id]);
-            addMatch(currentCard.id);
-          }
-          setCards(cards.slice(1));
+        if (direction === 'left' || direction === 'right') {
+          handleDecision(direction);
         }
       },
-      { threshold: 50 }
+      { threshold: 80 }
     );
 
   return (
     <>
-      <Navbar currentStep="Przewijanie" />
+      <Navbar currentStep="Przewijanie" groupName={groupName} />
       <div className="swipe-deck-container">
+        <PageHeader
+          eyebrow="Krok 2"
+          title="Wybierzcie najlepsze pomysły"
+          description="Przeciągnij kartę albo użyj przycisków. Polubione miejsca trafią do końcowego planu."
+        />
+
         <div className="deck-stats">
-          <span>Polubione: {matches.length}</span>
-          <span>Pozostało: {cards.length}</span>
+          <StatPill label="Polubione" value={matches.length} />
+          <StatPill label="Pozostało" value={cards.length} />
+          <StatPill label="Postęp" value={`${progress}%`} />
+        </div>
+
+        <div className="deck-progress" aria-hidden="true">
+          <span style={{ width: `${progress}%` }} />
         </div>
 
         <div
-          className="card-container"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          className={`card-container hint-${directionHint}`}
+          onPointerDown={cards.length > 0 ? handlePointerDown : undefined}
+          onPointerMove={cards.length > 0 ? handlePointerMove : undefined}
+          onPointerUp={cards.length > 0 ? handlePointerUp : undefined}
+          onPointerCancel={cards.length > 0 ? handlePointerUp : undefined}
           style={{
             transform: `translateX(${position}px) rotate(${rotate}deg)`,
-            cursor: 'grab',
+            cursor: cards.length > 0 ? 'grab' : 'default',
           }}
         >
           {cards.length > 0 ? (
-            <SwipeCard {...cards[0]} />
+            <>
+              <span className="swipe-hint swipe-hint-like">Tak</span>
+              <span className="swipe-hint swipe-hint-dislike">Nie</span>
+              <SwipeCard {...cards[0]} />
+            </>
           ) : (
-            <div className="empty-state">
-              <h2>Brak więcej kart!</h2>
-              <p>Kliknij przycisk poniżej, aby zobaczyć wyniki</p>
-              <button className="btn btn-primary" onClick={() => navigate('/final')}>
-                Przejdź do podsumowania
-              </button>
-            </div>
+            <EmptyState
+              title="Brak więcej kart!"
+              description="Kliknij przycisk poniżej, aby zobaczyć wyniki."
+              action={
+                <Button onClick={goToFinalPlan}>
+                  Przejdź do podsumowania
+                </Button>
+              }
+            />
           )}
         </div>
 
         <div className="swipe-actions">
-          <button className="action-btn dislike">Nie</button>
-          <button className="action-btn">Cofnij</button>
-          <button className="action-btn like">Tak</button>
-          <button className="btn btn-secondary" onClick={() => navigate('/setup')}>
-            Wróć do ustawień
+          <button className="action-btn dislike" onClick={() => handleDecision('left')} disabled={cards.length === 0}>
+            Nie
           </button>
+          <button className="action-btn undo" onClick={handleUndo} disabled={history.length === 0}>
+            Cofnij
+          </button>
+          <button className="action-btn like" onClick={() => handleDecision('right')} disabled={cards.length === 0}>
+            Tak
+          </button>
+          <Button variant="secondary" onClick={() => navigate('/setup')}>
+            Wróć do ustawień
+          </Button>
         </div>
       </div>
     </>

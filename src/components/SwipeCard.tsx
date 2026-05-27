@@ -8,6 +8,9 @@ interface SwipeCardProps {
   image: string;
   rating?: number;
   price?: number;
+  duration?: string;
+  vibe?: string;
+  tags?: string[];
 }
 
 const SwipeCard: React.FC<SwipeCardProps> = ({
@@ -16,17 +19,33 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   image,
   rating,
   price,
+  duration,
+  vibe,
+  tags = [],
 }) => {
   return (
     <div className="swipe-card">
       <div className="card-image">
         <img src={image} alt={title} />
+        {vibe && <span className="card-vibe">{vibe}</span>}
       </div>
       <div className="card-content">
-        <h2>{title}</h2>
+        <div>
+          <h2>{title}</h2>
+          {duration && <span className="card-duration">{duration}</span>}
+        </div>
         <p>{description}</p>
-        {rating && <span className="rating">Ocena {rating}</span>}
-        {price && <span className="price">{price} PLN</span>}
+        {tags.length > 0 && (
+          <div className="card-tags">
+            {tags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+        )}
+        <div className="card-meta">
+          {rating && <span className="rating">Ocena {rating}</span>}
+          {price && <span className="price">{price} PLN</span>}
+        </div>
       </div>
     </div>
   );

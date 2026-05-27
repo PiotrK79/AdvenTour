@@ -3,6 +3,9 @@ import type { AxiosInstance } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
+type ApiPayload = Record<string, unknown>;
+type DestinationFilters = Record<string, string | number | boolean | undefined>;
+
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -10,7 +13,6 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Interceptor do obsługi tokenów JWT
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken');
   if (token) {
@@ -19,7 +21,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Funkcje dla grup
 export const groupAPI = {
   createGroup: (name: string, members: string[]) =>
     apiClient.post('/groups', { name, members }),
@@ -27,13 +28,12 @@ export const groupAPI = {
     apiClient.get(`/groups/${groupId}`),
   joinGroup: (code: string) =>
     apiClient.post('/groups/join', { code }),
-  updateGroup: (groupId: string, data: any) =>
+  updateGroup: (groupId: string, data: ApiPayload) =>
     apiClient.put(`/groups/${groupId}`, data),
 };
 
-// Funkcje dla destynacji
 export const destinationAPI = {
-  getDestinations: (filters?: any) =>
+  getDestinations: (filters?: DestinationFilters) =>
     apiClient.get('/destinations', { params: filters }),
   getDestination: (id: string) =>
     apiClient.get(`/destinations/${id}`),
@@ -41,21 +41,19 @@ export const destinationAPI = {
     apiClient.post(`/groups/${groupId}/vote`, { destinationId, vote }),
 };
 
-// Funkcje dla itinerarium
 export const itineraryAPI = {
   getItinerary: (groupId: string) =>
     apiClient.get(`/groups/${groupId}/itinerary`),
-  updateItinerary: (groupId: string, itinerary: any) =>
+  updateItinerary: (groupId: string, itinerary: ApiPayload) =>
     apiClient.put(`/groups/${groupId}/itinerary`, itinerary),
-  generateItinerary: (groupId: string, preferences: any) =>
+  generateItinerary: (groupId: string, preferences: ApiPayload) =>
     apiClient.post(`/groups/${groupId}/itinerary/generate`, preferences),
 };
 
-// Funkcje dla użytkownika
 export const userAPI = {
   getCurrentUser: () =>
     apiClient.get('/users/me'),
-  updateProfile: (data: any) =>
+  updateProfile: (data: ApiPayload) =>
     apiClient.put('/users/me', data),
   login: (email: string, password: string) =>
     apiClient.post('/auth/login', { email, password }),

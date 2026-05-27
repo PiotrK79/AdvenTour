@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
+import SegmentedControl from './ui/SegmentedControl';
 import '../styles/components/FilterBar.scss';
-
-interface FilterBarProps {
-  onFilterChange?: (filters: FilterState) => void;
-}
 
 interface FilterState {
   budget: { min: number; max: number };
@@ -11,11 +8,24 @@ interface FilterState {
   intensity: 'low' | 'medium' | 'high';
 }
 
-const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange }) => {
+interface FilterBarProps {
+  initialFilters?: FilterState;
+  onFilterChange?: (filters: FilterState) => void;
+}
+
+const defaultFilters: FilterState = {
+  budget: { min: 0, max: 5000 },
+  duration: 7,
+  intensity: 'medium',
+};
+
+const FilterBar: React.FC<FilterBarProps> = ({
+  initialFilters = defaultFilters,
+  onFilterChange,
+}) => {
   const [filters, setFilters] = useState<FilterState>({
-    budget: { min: 0, max: 5000 },
-    duration: 7,
-    intensity: 'medium',
+    ...initialFilters,
+    budget: { ...initialFilters.budget },
   });
 
   const handleFilterChange = (newFilters: FilterState) => {
@@ -55,20 +65,21 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange }) => {
       </div>
 
       <div className="filter-item">
-        <label>Intensywność</label>
-        <select
+        <SegmentedControl
+          label="Intensywność"
           value={filters.intensity}
-          onChange={(e) =>
+          options={[
+            { label: 'Relaks', value: 'low' },
+            { label: 'Balans', value: 'medium' },
+            { label: 'Aktywnie', value: 'high' },
+          ]}
+          onChange={(intensity) =>
             handleFilterChange({
               ...filters,
-              intensity: e.target.value as 'low' | 'medium' | 'high',
+              intensity,
             })
           }
-        >
-          <option value="low">Relaksacyjna</option>
-          <option value="medium">Umiarkowana</option>
-          <option value="high">Ekstremalnie aktywna</option>
-        </select>
+        />
       </div>
     </div>
   );

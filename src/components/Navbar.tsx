@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/components/Navbar.scss';
 
 interface NavbarProps {
@@ -10,7 +11,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentStep, groupName }) => {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <h1>AdvenTour</h1>
+        <Link className="navbar-logo" to="/">
+          <h1>AdvenTour</h1>
+        </Link>
       </div>
       <div className="navbar-center">
         {currentStep && <span className="step-indicator">{currentStep}</span>}

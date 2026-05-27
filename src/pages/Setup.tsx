@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FilterBar from '../components/FilterBar';
 import { useGroup } from '../context/GroupContext';
+import Button from '../components/ui/Button';
+import PageHeader from '../components/ui/PageHeader';
+import Panel from '../components/ui/Panel';
+import TextInput from '../components/ui/TextInput';
 import '../styles/pages/Setup.scss';
 
 interface FilterState {
@@ -11,64 +15,93 @@ interface FilterState {
   intensity: 'low' | 'medium' | 'high';
 }
 
+const intensityLabels = {
+  low: 'Relaks',
+  medium: 'Balans',
+  high: 'Aktywnie',
+};
+
 const Setup: React.FC = () => {
   const navigate = useNavigate();
-  const { setFilters: setContextFilters } = useGroup();
+  const {
+    filters: savedFilters,
+    groupName,
+    setCurrentStep,
+    setFilters: setContextFilters,
+  } = useGroup();
   const [filters, setFilters] = useState<FilterState>({
-    budget: { min: 0, max: 5000 },
-    duration: 7,
-    intensity: 'medium',
+    budget: savedFilters.budget,
+    duration: savedFilters.duration,
+    intensity: savedFilters.intensity,
   });
-
-  const [destination, setDestination] = useState('');
+  const [destination, setDestination] = useState(savedFilters.destination);
+  const [error, setError] = useState('');
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
   };
 
   const handleContinue = () => {
-    if (destination.trim()) {
-      setContextFilters({ ...filters, destination });
-      navigate('/swipe');
+    const trimmedDestination = destination.trim();
+    if (!trimmedDestination) {
+      setError('Wpisz cel podróży, żeby zobaczyć propozycje.');
+      return;
     }
+
+    setContextFilters({ ...filters, destination: trimmedDestination });
+    setCurrentStep('swipe');
+    navigate('/swipe');
   };
 
   return (
     <>
-      <Navbar currentStep="Ustawienia" />
+      <Navbar currentStep="Ustawienia" groupName={groupName} />
       <div className="setup-container">
-        <h2>Skonfiguruj swoje preferencje</h2>
+        <PageHeader
+          eyebrow="Krok 1"
+          title="Skonfiguruj preferencje"
+          description="Wybierz kierunek i ramy wyjazdu. Te dane posłużą później do lepszego dopasowania propozycji."
+        />
 
-        <div className="setup-section">
-          <label>Dokąd chcesz pojechać?</label>
-          <input
-            type="text"
-            placeholder="Nazwa kraju, miasta lub regionu"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            className="destination-input"
-          />
-        </div>
+        <div className="setup-grid">
+          <div className="setup-main">
+            <Panel className="setup-section">
+              <TextInput
+                label="Dokąd chcesz pojechać?"
+                name="destination"
+                type="text"
+                placeholder="Nazwa kraju, miasta lub regionu"
+                value={destination}
+                error={error}
+                onChange={(e) => {
+                  setError('');
+                  setDestination(e.target.value);
+                }}
+                className="destination-input"
+              />
+            </Panel>
 
-        <FilterBar onFilterChange={handleFilterChange} />
+            <FilterBar initialFilters={filters} onFilterChange={handleFilterChange} />
+          </div>
 
-        <div className="setup-actions">
-          <button className="btn btn-primary" onClick={handleContinue}>
-            Przejdź do przewijania kart
-          </button>
-          <button className="btn btn-secondary" onClick={() => navigate('/')}>
-            Wróć
-          </button>
-        </div>
-
-        <div className="preferences-summary">
-          <h3>Twoje preferencje:</h3>
-          <ul>
-            <li>Cel: {destination || '(nie wybrano)'}</li>
-            <li>Budżet: {filters.budget.min} - {filters.budget.max} PLN</li>
-            <li>Czas: {filters.duration} dni</li>
-            <li>Intensywność: {filters.intensity}</li>
-          </ul>
+          <Panel className="preferences-summary">
+            <span className="summary-label">Podsumowanie</span>
+            <h3>Twoje preferencje</h3>
+            <ul>
+              <li><span>Cel</span><strong>{destination || 'Nie wybrano'}</strong></li>
+              <li><span>Budżet</span><strong>{filters.budget.min} - {filters.budget.max} PLN</strong></li>
+              <li><span>Czas</span><strong>{filters.duration} dni</strong></li>
+              <li><span>Tempo</span><strong>{intensityLabels[filters.intensity]}</strong></li>
+            </ul>
+            <div className="setup-actions">
+              <Button onClick={handleContinue} disabled={!destination.trim()} fullWidth>
+                Przejdź do przewijania kart
+              </Button>
+              <Button variant="secondary" onClick={() => navigate('/')} fullWidth>
+                Wróć
+              </Button>
+            </div>
+          </Panel>
         </div>
       </div>
     </>

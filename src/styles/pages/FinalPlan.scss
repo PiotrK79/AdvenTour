@@ -16,12 +16,62 @@
   margin-bottom: var(--space-8);
 }
 
+.plan-sidebar {
+  display: grid;
+  gap: var(--space-5);
+}
+
 .plan-section {
   @include panel;
   padding: var(--space-6);
 
   > h3 {
     margin-bottom: var(--space-5);
+  }
+}
+
+.trip-summary {
+  padding: var(--space-6);
+
+  .summary-label {
+    display: inline-flex;
+    margin-bottom: var(--space-3);
+    color: var(--color-brand-strong);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin-bottom: var(--space-4);
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    padding-block: var(--space-3);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  span {
+    color: var(--color-text-muted);
+  }
+
+  strong {
+    text-align: right;
   }
 }
 

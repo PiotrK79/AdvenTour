@@ -21,6 +21,11 @@
   }
 }
 
+.navbar-logo {
+  display: inline-flex;
+  text-decoration: none;
+}
+
 .navbar-left,
 .navbar-right {
   min-width: 0;
