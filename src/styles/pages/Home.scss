@@ -1,0 +1,44 @@
+@use '../abstracts/mixins' as *;
+
+.home-container {
+  @include page-shell(46rem);
+  display: grid;
+  min-height: calc(100vh - 5rem);
+  align-content: center;
+  gap: var(--space-5);
+  text-align: center;
+
+  h2 {
+    max-width: 11ch;
+    margin-inline: auto;
+  }
+
+  > p {
+    max-width: 36rem;
+    margin: 0 auto var(--space-4);
+    font-size: 1.12rem;
+  }
+}
+
+.mode-selection,
+.form-section {
+  @include panel;
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+
+.mode-selection {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-section {
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+@media (max-width: 680px) {
+  .mode-selection {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,59 @@
+@use '../abstracts/mixins' as *;
+
+.group-info {
+  @include panel;
+  padding: var(--space-6);
+
+  h3 {
+    margin-bottom: var(--space-2);
+  }
+}
+
+.group-id {
+  display: inline-flex;
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.members-section {
+  display: grid;
+  gap: var(--space-3);
+
+  h4 {
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+  }
+}
+
+.members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.member {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  padding: 0.45rem 0.75rem 0.45rem 0.45rem;
+  color: var(--color-text);
+  font-weight: 750;
+}
+
+.member-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--gradient-brand);
+}

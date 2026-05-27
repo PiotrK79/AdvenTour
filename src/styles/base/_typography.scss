@@ -1,0 +1,39 @@
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-text);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+p {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+a {
+  color: var(--color-brand);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-brand-strong);
+  }
+}

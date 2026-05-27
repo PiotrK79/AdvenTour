@@ -1,0 +1,22 @@
+@mixin container($max-width: var(--container)) {
+  width: min($max-width, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@mixin panel {
+  background: var(--color-surface-raised);
+  border: 1px solid rgba(219, 227, 234, 0.82);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(18px);
+}
+
+@mixin focus-ring {
+  outline: 3px solid rgba(37, 99, 235, 0.24);
+  outline-offset: 2px;
+}
+
+@mixin page-shell($max-width: var(--container)) {
+  @include container($max-width);
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
